@@ -167,6 +167,12 @@ async function handleApi(req, res, url) {
   const imageMatch = /^\/api\/items\/([^/]+)\/image\/?$/.exec(url.pathname);
   const itemMatch = /^\/api\/items\/([^/]+)\/?$/.exec(url.pathname);
 
+  if (url.pathname === '/api/auth') {
+    if (method !== 'POST') return sendJson(res, 405, { error: 'method not allowed' });
+    if (!isAuthorized(req)) return sendJson(res, 401, { error: 'unauthorized' });
+    return sendJson(res, 200, { ok: true });
+  }
+
   if (imageMatch) {
     if (method !== 'GET') return sendJson(res, 405, { error: 'method not allowed' });
     const id = decodeURIComponent(imageMatch[1]);
@@ -326,7 +332,7 @@ async function serveStatic(req, res, url) {
 const server = createServer(async (req, res) => {
   try {
     const url = new URL(req.url || '/', `http://${req.headers.host || 'localhost'}`);
-    if (url.pathname.startsWith('/api/items')) {
+    if (url.pathname.startsWith('/api/')) {
       await handleApi(req, res, url);
     } else {
       await serveStatic(req, res, url);

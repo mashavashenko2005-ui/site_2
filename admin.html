@@ -262,8 +262,8 @@ textarea{resize:vertical;min-height:80px}
 
 <script>
 const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'cozy2025';
 const API_URL = '/api/items';
+const AUTH_URL = '/api/auth';
 
 let CACHE = [];
 
@@ -280,6 +280,14 @@ async function apiList() {
   if (!res.ok) throw new Error('Failed to load items');
   const data = await res.json();
   return Array.isArray(data.items) ? data.items : [];
+}
+
+async function apiLogin(password) {
+  const res = await fetch(AUTH_URL, {
+    method: 'POST',
+    headers: { 'x-admin-password': password },
+  });
+  return res.ok;
 }
 
 async function apiCreate(item) {
@@ -342,15 +350,28 @@ async function apiDelete(id) {
 async function doLogin() {
   const u = document.getElementById('loginUser').value.trim();
   const p = document.getElementById('loginPass').value;
-  if (u === ADMIN_USER && p === ADMIN_PASS) {
+  const err = document.getElementById('loginErr');
+  err.textContent = 'Incorrect username or password';
+  err.style.display = 'none';
+  if (u !== ADMIN_USER || !p) {
+    err.style.display = 'block';
+    return;
+  }
+  try {
+    const ok = await apiLogin(p);
+    if (!ok) {
+      err.style.display = 'block';
+      return;
+    }
     sessionStorage.setItem('cozy_admin', '1');
     sessionStorage.setItem('cozy_admin_pass', p);
     document.getElementById('loginWrap').style.display = 'none';
     document.getElementById('adminWrap').style.display = 'block';
     await migrateLocalIfAny();
     renderAdmin();
-  } else {
-    document.getElementById('loginErr').style.display = 'block';
+  } catch {
+    err.textContent = 'Could not reach the server. Try again.';
+    err.style.display = 'block';
   }
 }
 
