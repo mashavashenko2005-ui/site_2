@@ -348,3 +348,13 @@ server.listen(PORT, () => {
   console.log(`Cozy Home Ideas is running: http://localhost:${PORT}`);
   console.log('Admin panel: http://localhost:' + PORT + '/admin.html');
 });
+
+function shutdown(signal) {
+  console.log(`${signal} received, shutting down...`);
+  server.close(() => {
+    process.exit(0);
+  });
+}
+
+process.on('SIGTERM', () => shutdown('SIGTERM'));
+process.on('SIGINT', () => shutdown('SIGINT'));
