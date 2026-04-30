@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/assets/favicon.png">
+<title>Admin — Cozy Home Ideas</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --cream:#F9F4EE;--beige:#EFE6D9;--sand:#DDD0BC;
+  --terra:#C4714A;--terra-dark:#A05535;
+  --brown:#5C3D2E;--warm-gray:#8C7B6E;
+  --text:#2E1F14;--text-mid:#6B4F3A;--white:#FDFAF7;
+  --green:#4A7C59;--red:#A03030;
+}
+body{font-family:'Jost',sans-serif;background:var(--cream);color:var(--text);font-weight:300;min-height:100vh}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--beige)}
+.login-box{background:var(--white);border:1px solid var(--sand);padding:48px 40px;width:380px;text-align:center}
+.login-logo{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;margin-bottom:6px}
+.login-logo span{font-style:italic;color:var(--terra)}
+.login-sub{font-size:13px;color:var(--warm-gray);margin-bottom:32px;letter-spacing:.03em}
+.login-box input{width:100%;border:1px solid var(--sand);background:var(--cream);padding:12px 14px;font-family:'Jost',sans-serif;font-size:14px;color:var(--text);margin-bottom:12px;outline:none;transition:border-color .2s}
+.login-box input:focus{border-color:var(--terra)}
+.login-btn{width:100%;background:var(--terra);color:var(--white);border:none;padding:14px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s;margin-top:4px}
+.login-btn:hover{background:var(--terra-dark)}
+.login-err{font-size:13px;color:var(--red);margin-top:12px;display:none}
+
+/* ADMIN LAYOUT */
+.admin-wrap{display:none}
+.admin-header{background:var(--brown);padding:0 2rem;height:60px;display:flex;align-items:center;justify-content:space-between}
+.admin-logo{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--white);font-weight:300}
+.admin-logo span{font-style:italic;color:#E8C4A8}
+.admin-header-right{display:flex;gap:16px;align-items:center}
+.btn-view{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:#E8C4A8;text-decoration:none;opacity:.7;transition:opacity .2s}
+.btn-view:hover{opacity:1}
+.btn-logout{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:#E8C4A8;background:none;border:1px solid rgba(232,196,168,.3);padding:6px 14px;cursor:pointer;font-family:'Jost',sans-serif;transition:all .2s}
+.btn-logout:hover{border-color:#E8C4A8}
+
+.admin-body{max-width:1100px;margin:0 auto;padding:40px 2rem}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:40px}
+.stat-card{background:var(--white);border:1px solid var(--sand);padding:20px 24px}
+.stat-num{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:300;color:var(--terra);line-height:1}
+.stat-label{font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--warm-gray);margin-top:6px}
+
+/* ADD FORM */
+.section-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:300;margin-bottom:20px}
+.form-card{background:var(--white);border:1px solid var(--sand);padding:32px}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.form-group{display:flex;flex-direction:column;gap:6px}
+.form-group.full{grid-column:1/-1}
+label{font-size:12px;letter-spacing:.07em;text-transform:uppercase;color:var(--warm-gray)}
+input,select,textarea{border:1px solid var(--sand);background:var(--cream);padding:10px 14px;font-family:'Jost',sans-serif;font-size:14px;color:var(--text);outline:none;transition:border-color .2s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--terra)}
+select{cursor:pointer}
+textarea{resize:vertical;min-height:80px}
+.img-upload{border:2px dashed var(--sand);padding:32px;text-align:center;cursor:pointer;transition:border-color .2s;position:relative}
+.img-upload:hover{border-color:var(--terra)}
+.img-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
+.img-upload-text{font-size:14px;color:var(--warm-gray)}
+.img-upload-text strong{display:block;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:400;color:var(--text-mid);margin-bottom:4px}
+.img-preview{width:100%;max-height:200px;object-fit:cover;display:none;margin-top:12px}
+.form-actions{margin-top:24px;display:flex;gap:12px;align-items:center}
+.btn-add{background:var(--terra);color:var(--white);border:none;padding:14px 32px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.btn-add:hover{background:var(--terra-dark)}
+.btn-add:disabled{opacity:.5;cursor:not-allowed}
+.btn-export{background:var(--brown);color:#E8C4A8;border:none;padding:12px 24px;font-family:'Jost',sans-serif;font-size:12px;letter-spacing:.08em;text-transform:uppercase;cursor:pointer;transition:background .2s}
+.btn-export:hover{background:#3D2A1E}
+.export-banner{background:#EAF3EA;border:1px solid #4A7C59;padding:16px 20px;margin-bottom:24px;display:none;align-items:center;gap:12px}
+.export-banner p{font-size:14px;color:#2E4A35;line-height:1.6}
+.export-banner strong{font-weight:500}
+.form-msg{font-size:13px;display:none;padding:10px 16px}
+.form-msg.success{background:#EAF3EA;color:var(--green)}
+.form-msg.error{background:#F5EAEA;color:var(--red)}
+
+/* ITEMS TABLE */
+.items-section{margin-top:48px}
+.items-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:20px}
+.item-card{background:var(--white);border:1px solid var(--sand);overflow:hidden;position:relative}
+.item-card img{width:100%;height:160px;object-fit:cover;display:block}
+.item-info{padding:12px 14px}
+.item-cat{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--terra);margin-bottom:3px}
+.item-title{font-size:14px;font-weight:400;margin-bottom:2px}
+.item-source{font-size:11px;color:var(--warm-gray)}
+.item-actions{position:absolute;top:8px;right:8px;display:flex;gap:6px;opacity:0;transition:opacity .2s}
+.item-card:hover .item-actions{opacity:1}
+.item-del,.item-edit{background:rgba(46,31,20,.7);color:white;border:none;width:28px;height:28px;cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;border-radius:50%;transition:background .2s;font-family:'Jost',sans-serif}
+.item-edit{background:rgba(196,113,74,.85)}
+.item-edit:hover{background:var(--terra-dark)}
+.item-del:hover{background:var(--red)}
+.item-seed{position:absolute;top:8px;left:8px;background:var(--terra);color:white;font-size:9px;letter-spacing:.06em;text-transform:uppercase;padding:3px 7px}
+
+/* EDIT MODAL */
+.edit-overlay{display:none;position:fixed;inset:0;background:rgba(46,31,20,.75);z-index:1000;align-items:center;justify-content:center;padding:2rem}
+.edit-overlay.open{display:flex}
+.edit-modal{background:var(--white);max-width:640px;width:100%;max-height:90vh;overflow-y:auto;padding:32px;position:relative}
+.edit-close{position:absolute;top:14px;right:16px;background:none;border:none;font-size:22px;cursor:pointer;color:var(--text-mid);line-height:1}
+.edit-close:hover{color:var(--terra)}
+.edit-title{font-family:'Cormorant Garamond',serif;font-size:26px;font-weight:300;margin-bottom:20px}
+
+.empty-items{text-align:center;padding:48px;color:var(--warm-gray);grid-column:1/-1}
+.empty-items p{font-family:'Cormorant Garamond',serif;font-size:22px;margin-bottom:6px;color:var(--text-mid)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-wrap" id="loginWrap">
+  <div class="login-box">
+    <div class="login-logo">Cozy <span>Home</span> Ideas</div>
+    <div class="login-sub">Admin Panel</div>
+    <input type="text" id="loginUser" placeholder="Username" onkeydown="if(event.key==='Enter')doLogin()">
+    <input type="password" id="loginPass" placeholder="Password" onkeydown="if(event.key==='Enter')doLogin()">
+    <button class="login-btn" onclick="doLogin()">Sign In</button>
+    <div class="login-err" id="loginErr">Incorrect username or password</div>
+  </div>
+</div>
+
+<!-- ADMIN PANEL -->
+<div class="admin-wrap" id="adminWrap">
+  <div class="admin-header">
+    <div class="admin-logo">Cozy <span>Home</span> Admin</div>
+    <div class="admin-header-right">
+      <a href="index.html" class="btn-view">← View Site</a>
+      <button class="btn-logout" onclick="doLogout()">Sign Out</button>
+    </div>
+  </div>
+
+  <div class="admin-body">
+
+    <!-- STATS -->
+    <div class="stats-row" id="statsRow"></div>
+
+    <!-- PUBLISH BANNER -->
+    <div class="export-banner" id="exportBanner">
+      <div>
+        <p id="exportBannerText"><strong>✓ Everything is live.</strong><br>All your images have been published — visitors see them on the site right now.</p>
+      </div>
+    </div>
+
+    <!-- ADD NEW -->
+    <div class="section-title">Add New Image</div>
+    <div class="form-card">
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Title *</label>
+          <input type="text" id="fTitle" placeholder="e.g. Earthy Bedroom with Warm Tones">
+        </div>
+        <div class="form-group">
+          <label>Category *</label>
+          <select id="fCat">
+            <option value="">Select category</option>
+            <option value="bedroom">Bedroom</option>
+            <option value="kitchen">Kitchen</option>
+            <option value="bathroom">Bathroom</option>
+            <option value="living">Living Room</option>
+            <option value="dining">Dining Room</option>
+            <option value="entryway">Entryway</option>
+            <option value="office">Home Office</option>
+            <option value="outdoor">Outdoor</option>
+          </select>
+        </div>
+        <div class="form-group full">
+          <label>Description</label>
+          <textarea id="fDesc" placeholder="Describe the style, mood, key elements of this interior..."></textarea>
+        </div>
+        <div class="form-group full">
+          <label>Image *</label>
+          <div class="img-upload" id="uploadBox">
+            <input type="file" id="fFile" accept="image/*" onchange="previewImage(this)">
+            <div class="img-upload-text">
+              <strong>Click to upload image</strong>
+              JPG, PNG, WEBP — any size
+            </div>
+            <img id="imgPreview" class="img-preview" src="" alt="">
+          </div>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-add" id="addBtn" onclick="addItem()">Add to Site</button>
+        <div class="form-msg" id="formMsg"></div>
+      </div>
+    </div>
+
+    <!-- CURRENT ITEMS -->
+    <div class="items-section">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0">
+        <div class="section-title" style="margin-bottom:0">All Images on Site</div>
+        <button class="btn-export" id="confirmPubBtn" onclick="confirmPublication()">✓ Confirm Publication</button>
+      </div>
+      <div class="items-grid" id="itemsGrid"></div>
+    </div>
+
+  
+    <!-- DEDUP SECTION -->
+    <div class="items-section" style="margin-top:40px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+        <div class="section-title" style="margin-bottom:0">Find & Remove Duplicates</div>
+        <button class="btn-export" onclick="findDuplicates()" style="background:var(--terra)">🔍 Scan for Duplicates</button>
+      </div>
+      <div id="dupResult" style="display:none">
+        <div id="dupList" class="items-grid"></div>
+        <div style="margin-top:16px">
+          <button class="btn-add" onclick="removeAllDuplicates()" id="dupRemoveBtn" style="display:none;background:var(--red)">Remove All Duplicates</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="edit-overlay" id="editOverlay">
+  <div class="edit-modal">
+    <button class="edit-close" onclick="closeEdit()" title="Close">✕</button>
+    <div class="edit-title">Edit Image</div>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Title *</label>
+        <input type="text" id="eTitle">
+      </div>
+      <div class="form-group">
+        <label>Category *</label>
+        <select id="eCat">
+          <option value="bedroom">Bedroom</option>
+          <option value="kitchen">Kitchen</option>
+          <option value="bathroom">Bathroom</option>
+          <option value="living">Living Room</option>
+          <option value="dining">Dining Room</option>
+          <option value="entryway">Entryway</option>
+          <option value="office">Home Office</option>
+          <option value="outdoor">Outdoor</option>
+        </select>
+      </div>
+      <div class="form-group full">
+        <label>Description</label>
+        <textarea id="eDesc"></textarea>
+      </div>
+      <div class="form-group full">
+        <label>Image</label>
+        <div class="img-upload">
+          <input type="file" id="eFile" accept="image/*" onchange="previewEditImage(this)">
+          <div class="img-upload-text" id="eUploadText">
+            <strong>Click to replace image</strong>
+            Leave empty to keep the current one
+          </div>
+          <img id="eImgPreview" class="img-preview" src="" alt="">
+        </div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="btn-add" onclick="saveEdit()">Save Changes</button>
+      <button class="btn-export" style="background:var(--warm-gray);color:var(--white)" onclick="closeEdit()">Cancel</button>
+      <div class="form-msg" id="editMsg"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const ADMIN_USER = 'admin';
+const ADMIN_PASS = 'cozy2025';
+const API_URL = '/api/items';
+
+let CACHE = [];
+
+function getPass() {
+  return sessionStorage.getItem('cozy_admin_pass') || '';
+}
+
+function authHeaders(extra) {
+  return Object.assign({ 'x-admin-password': getPass() }, extra || {});
+}
+
+async function apiList() {
+  const res = await fetch(API_URL, { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to load items');
+  const data = await res.json();
+  return Array.isArray(data.items) ? data.items : [];
+}
+
+async function apiCreate(item) {
+  const form = new FormData();
+  if (item.id) form.append('id', item.id);
+  form.append('title', item.title || '');
+  form.append('category', item.category || '');
+  form.append('description', item.description || '');
+  if (item.imageBlob) form.append('image', item.imageBlob, 'upload.jpg');
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: authHeaders(),
+    body: form,
+  });
+  if (!res.ok) {
+    let detail = '';
+    try { detail = (await res.json()).error || ''; } catch {}
+    throw new Error('Save failed (' + res.status + ')' + (detail ? ': ' + detail : ''));
+  }
+  return (await res.json()).item;
+}
+
+async function apiBulkCreate(items) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: authHeaders({ 'Content-Type': 'application/json' }),
+    body: JSON.stringify({ items }),
+  });
+  if (!res.ok) throw new Error('Bulk save failed (' + res.status + ')');
+  return (await res.json()).items || [];
+}
+
+async function apiUpdate(id, patch) {
+  const form = new FormData();
+  if (patch.title != null) form.append('title', patch.title);
+  if (patch.category != null) form.append('category', patch.category);
+  if (patch.description != null) form.append('description', patch.description);
+  if (patch.imageBlob) form.append('image', patch.imageBlob, 'upload.jpg');
+  const res = await fetch(API_URL + '/' + encodeURIComponent(id), {
+    method: 'PUT',
+    headers: authHeaders(),
+    body: form,
+  });
+  if (!res.ok) {
+    let detail = '';
+    try { detail = (await res.json()).error || ''; } catch {}
+    throw new Error('Update failed (' + res.status + ')' + (detail ? ': ' + detail : ''));
+  }
+  return (await res.json()).item;
+}
+
+async function apiDelete(id) {
+  const res = await fetch(API_URL + '/' + encodeURIComponent(id), {
+    method: 'DELETE',
+    headers: authHeaders(),
+  });
+  if (!res.ok) throw new Error('Delete failed (' + res.status + ')');
+}
+
+async function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (u === ADMIN_USER && p === ADMIN_PASS) {
+    sessionStorage.setItem('cozy_admin', '1');
+    sessionStorage.setItem('cozy_admin_pass', p);
+    document.getElementById('loginWrap').style.display = 'none';
+    document.getElementById('adminWrap').style.display = 'block';
+    await migrateLocalIfAny();
+    renderAdmin();
+  } else {
+    document.getElementById('loginErr').style.display = 'block';
+  }
+}
+
+function doLogout() {
+  sessionStorage.removeItem('cozy_admin');
+  sessionStorage.removeItem('cozy_admin_pass');
+  document.getElementById('loginWrap').style.display = 'flex';
+  document.getElementById('adminWrap').style.display = 'none';
+}
+
+if (sessionStorage.getItem('cozy_admin')) {
+  document.getElementById('loginWrap').style.display = 'none';
+  document.getElementById('adminWrap').style.display = 'block';
+  setTimeout(async () => { await migrateLocalIfAny(); renderAdmin(); }, 10);
+}
+
+async function migrateLocalIfAny() {
+  let local = [];
+  try { local = JSON.parse(localStorage.getItem('cozy_items') || '[]'); } catch(e) { local = []; }
+  if (!local.length) return;
+  try {
+    const remote = await apiList();
+    const remoteIds = new Set(remote.map(i => i.id));
+    const toUpload = local.filter(i => i && i.id && !remoteIds.has(i.id) && i.title && i.category && i.image);
+    if (toUpload.length) {
+      await apiBulkCreate(toUpload);
+    }
+    localStorage.removeItem('cozy_items');
+  } catch (e) {
+    console.warn('Local migration skipped:', e);
+  }
+}
+
+const CATEGORIES = ['bedroom','kitchen','bathroom','living','dining','entryway','office','outdoor'];
+
+async function renderAdmin() {
+  try {
+    CACHE = await apiList();
+  } catch (e) {
+    showMsg('Could not load images from the server. Check your connection and try again.', 'error');
+    CACHE = [];
+  }
+  renderStats();
+  renderGrid();
+}
+
+function renderStats() {
+  const extra = CACHE;
+  const cats = {};
+  CATEGORIES.forEach(c => cats[c] = 0);
+  extra.forEach(i => { if (cats[i.category] !== undefined) cats[i.category]++; });
+  const total = extra.length;
+  const topCat = Object.entries(cats).sort((a,b)=>b[1]-a[1])[0];
+
+  document.getElementById('statsRow').innerHTML = `
+    <div class="stat-card">
+      <div class="stat-num">${total + 5}</div>
+      <div class="stat-label">Total Images</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${total}</div>
+      <div class="stat-label">Added by You</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">5</div>
+      <div class="stat-label">Seed Images</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-num">${topCat && topCat[1] > 0 ? topCat[1] : '—'}</div>
+      <div class="stat-label">${topCat && topCat[1] > 0 ? topCat[0] + ' images' : 'Most added'}</div>
+    </div>
+  `;
+}
+
+function renderGrid() {
+  const extra = CACHE;
+  const grid = document.getElementById('itemsGrid');
+
+  const seedCards = `
+    <div class="item-card">
+      <div class="item-seed">Built-in</div>
+      <div style="height:160px;background:#EFE6D9;display:flex;align-items:center;justify-content:center;color:#8C7B6E;font-size:13px">5 seed images</div>
+      <div class="item-info"><div class="item-cat">all categories</div><div class="item-title">Original 5 Images</div><div class="item-source">Built into the site</div></div>
+    </div>
+  `;
+
+  if (extra.length === 0) {
+    grid.innerHTML = seedCards + `<div class="empty-items"><p>No images added yet.</p><span>Use the form above to add your first image.</span></div>`;
+    return;
+  }
+
+  const cards = extra.map((item, idx) => `
+    <div class="item-card">
+      <div class="item-actions">
+        <button class="item-edit" onclick="openEdit(${idx})" title="Edit">✎</button>
+        <button class="item-del" onclick="deleteItem(${idx})" title="Delete">✕</button>
+      </div>
+      <img src="${item.image}" alt="${item.title}">
+      <div class="item-info">
+        <div class="item-cat">${item.category}</div>
+        <div class="item-title">${item.title}</div>
+        <div class="item-source">Added by you</div>
+      </div>
+    </div>
+  `).join('');
+
+  grid.innerHTML = seedCards + cards;
+}
+
+async function deleteItem(idx) {
+  const item = CACHE[idx];
+  if (!item) return;
+  if (!confirm('Remove this image from the site?')) return;
+  try {
+    await apiDelete(item.id);
+    await renderAdmin();
+    showMsg('✓ Image removed from the site.', 'success');
+  } catch (e) {
+    showMsg('Could not remove this image. ' + e.message, 'error');
+  }
+}
+
+let editingIdx = null;
+let editingNewImage = null;
+
+function openEdit(idx) {
+  const item = CACHE[idx];
+  if (!item) return;
+  editingIdx = idx;
+  editingNewImage = null;
+  document.getElementById('eTitle').value = item.title || '';
+  document.getElementById('eCat').value = item.category || '';
+  document.getElementById('eDesc').value = item.description || '';
+  document.getElementById('eFile').value = '';
+  const preview = document.getElementById('eImgPreview');
+  preview.src = item.image;
+  preview.style.display = 'block';
+  document.getElementById('eUploadText').style.display = 'block';
+  document.getElementById('editMsg').style.display = 'none';
+  document.getElementById('editOverlay').classList.add('open');
+}
+
+function closeEdit() {
+  document.getElementById('editOverlay').classList.remove('open');
+  editingIdx = null;
+  editingNewImage = null;
+}
+
+async function previewEditImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const { dataUrl, blob } = await compressImage(file);
+  editingNewImage = blob || null;
+  const preview = document.getElementById('eImgPreview');
+  preview.src = dataUrl;
+  preview.style.display = 'block';
+}
+
+async function saveEdit() {
+  if (editingIdx === null) return;
+  const title = document.getElementById('eTitle').value.trim();
+  const cat = document.getElementById('eCat').value;
+  const desc = document.getElementById('eDesc').value.trim();
+  const msg = document.getElementById('editMsg');
+  if (!title || !cat) {
+    msg.textContent = 'Title and category are required.';
+    msg.className = 'form-msg error';
+    msg.style.display = 'block';
+    return;
+  }
+  const item = CACHE[editingIdx];
+  if (!item) { closeEdit(); return; }
+  try {
+    const patch = { title, category: cat, description: desc || title };
+    if (editingNewImage) patch.imageBlob = editingNewImage;
+    await apiUpdate(item.id, patch);
+    closeEdit();
+    await renderAdmin();
+    showMsg('✓ Image updated and live on the site.', 'success');
+  } catch (e) {
+    msg.textContent = 'Could not save changes. ' + e.message;
+    msg.className = 'form-msg error';
+    msg.style.display = 'block';
+  }
+}
+
+// Maximum dimension (longest side) and JPEG quality used to keep uploads
+// fast and friendly for the standalone Node backend.
+const MAX_IMAGE_DIM = 1400;
+const IMAGE_QUALITY = 0.82;
+
+function loadImage(src) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = () => reject(new Error('Could not read this image file.'));
+    img.src = src;
+  });
+}
+
+function readFileAsDataURL(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = e => resolve(e.target.result);
+    reader.onerror = () => reject(new Error('Could not read the selected file.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+function canvasToBlob(canvas, type, quality) {
+  return new Promise((resolve) => {
+    if (canvas.toBlob) canvas.toBlob(b => resolve(b), type, quality);
+    else resolve(null);
+  });
+}
+
+async function compressImage(file) {
+  const original = await readFileAsDataURL(file);
+  let img;
+  try { img = await loadImage(original); } catch { return { dataUrl: original, blob: file }; }
+  const w = img.naturalWidth || img.width;
+  const h = img.naturalHeight || img.height;
+  const longest = Math.max(w, h);
+  const scale = longest > MAX_IMAGE_DIM ? MAX_IMAGE_DIM / longest : 1;
+  const tw = Math.round(w * scale);
+  const th = Math.round(h * scale);
+  const canvas = document.createElement('canvas');
+  canvas.width = tw;
+  canvas.height = th;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, tw, th);
+  let dataUrl;
+  try { dataUrl = canvas.toDataURL('image/jpeg', IMAGE_QUALITY); } catch { dataUrl = original; }
+  const blob = await canvasToBlob(canvas, 'image/jpeg', IMAGE_QUALITY);
+  if (blob && file && blob.size > file.size && /^image\/(jpe?g|png|webp)$/.test(file.type)) {
+    return { dataUrl: original, blob: file };
+  }
+  return { dataUrl: dataUrl || original, blob: blob || file };
+}
+
+async function previewImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const { dataUrl, blob } = await compressImage(file);
+  const preview = document.getElementById('imgPreview');
+  preview.src = dataUrl;
+  preview.dataset.src = dataUrl;
+  preview.style.display = 'block';
+  document.querySelector('.img-upload-text').style.display = 'none';
+  pendingImageBlob = blob || null;
+}
+
+let pendingImageBlob = null;
+
+async function addItem() {
+  const title = document.getElementById('fTitle').value.trim();
+  const cat = document.getElementById('fCat').value;
+  const desc = document.getElementById('fDesc').value.trim();
+  const file = document.getElementById('fFile').files[0];
+  const btn = document.getElementById('addBtn');
+  const preview = document.getElementById('imgPreview');
+
+  if (!title || !cat || (!file && !preview.dataset.src)) {
+    showMsg('Please fill in title, category, and upload an image.', 'error');
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = 'Publishing...';
+
+  try {
+    let imageBlob = pendingImageBlob;
+    if (!imageBlob && file) {
+      const compressed = await compressImage(file);
+      imageBlob = compressed.blob;
+    }
+    if (!imageBlob) throw new Error('Image could not be processed.');
+
+    await apiCreate({
+      id: 'user_' + Date.now(),
+      title,
+      category: cat,
+      description: desc || title,
+      imageBlob,
+    });
+
+    document.getElementById('fTitle').value = '';
+    document.getElementById('fCat').value = '';
+    document.getElementById('fDesc').value = '';
+    document.getElementById('fFile').value = '';
+    preview.style.display = 'none';
+    preview.removeAttribute('data-src');
+    preview.src = '';
+    document.querySelector('.img-upload-text').style.display = 'block';
+    pendingImageBlob = null;
+
+    await renderAdmin();
+    showMsg('✓ Image published — it\'s already live on your site.', 'success');
+  } catch (err) {
+    showMsg('Could not publish: ' + err.message, 'error');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Add to Site';
+  }
+}
+
+async function confirmPublication() {
+  const btn = document.getElementById('confirmPubBtn');
+  const banner = document.getElementById('exportBanner');
+  const text = document.getElementById('exportBannerText');
+  btn.disabled = true;
+  const original = btn.textContent;
+  btn.textContent = 'Checking…';
+  try {
+    await migrateLocalIfAny();
+    const items = await apiList();
+    CACHE = items;
+    renderStats();
+    renderGrid();
+    text.innerHTML = '<strong>✓ Everything is live.</strong><br>' + items.length + ' image(s) added by you are visible on the site right now — no manual upload needed.';
+    banner.style.display = 'flex';
+    setTimeout(() => banner.style.display = 'none', 6000);
+  } catch (e) {
+    text.innerHTML = '<strong>Could not verify publication.</strong><br>' + e.message;
+    banner.style.display = 'flex';
+    setTimeout(() => banner.style.display = 'none', 6000);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = original;
+  }
+}
+
+async function findDuplicates() {
+  const extra = CACHE;
+  const seen = {};
+  const dups = [];
+  extra.forEach((item, idx) => {
+    const key = (item.title || '').toLowerCase().trim();
+    if (seen[key] !== undefined) {
+      dups.push({item, idx, original: seen[key]});
+    } else {
+      seen[key] = idx;
+    }
+  });
+  const result = document.getElementById('dupResult');
+  const list = document.getElementById('dupList');
+  const btn = document.getElementById('dupRemoveBtn');
+  result.style.display = 'block';
+  if (dups.length === 0) {
+    list.innerHTML = '<div class="empty-items"><p>No duplicates found!</p><span>All your images are unique.</span></div>';
+    btn.style.display = 'none';
+  } else {
+    list.innerHTML = dups.map(d => `
+      <div class="item-card" style="border:2px solid var(--terra)">
+        <div class="item-seed" style="background:var(--red)">Duplicate</div>
+        <img src="${d.item.image}" alt="${d.item.title}">
+        <div class="item-info">
+          <div class="item-cat">${d.item.category}</div>
+          <div class="item-title">${d.item.title}</div>
+          <div class="item-source" style="color:var(--red)">Duplicate of entry #${d.original + 1}</div>
+        </div>
+        <button class="item-del" style="opacity:1" onclick="deleteSingleDup(${d.idx})">✕</button>
+      </div>
+    `).join('');
+    btn.style.display = 'inline-block';
+    btn.textContent = 'Remove All ' + dups.length + ' Duplicates';
+  }
+}
+
+async function deleteSingleDup(idx) {
+  const item = CACHE[idx];
+  if (!item) return;
+  try {
+    await apiDelete(item.id);
+    await renderAdmin();
+    findDuplicates();
+  } catch (e) {
+    showMsg('Could not remove duplicate. ' + e.message, 'error');
+  }
+}
+
+async function removeAllDuplicates() {
+  const extra = CACHE;
+  const seen = new Set();
+  const toRemove = [];
+  extra.forEach(item => {
+    const key = (item.title || '').toLowerCase().trim();
+    if (seen.has(key)) toRemove.push(item.id);
+    else seen.add(key);
+  });
+  try {
+    for (const id of toRemove) await apiDelete(id);
+    await renderAdmin();
+    showMsg('✓ Removed ' + toRemove.length + ' duplicate(s).', 'success');
+    document.getElementById('dupResult').style.display = 'none';
+  } catch (e) {
+    showMsg('Could not remove duplicates. ' + e.message, 'error');
+  }
+}
+
+
+function showMsg(text, type) {
+  const msg = document.getElementById('formMsg');
+  msg.textContent = text;
+  msg.className = 'form-msg ' + type;
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 4000);
+}
+</script>
+</body>
+</html>
