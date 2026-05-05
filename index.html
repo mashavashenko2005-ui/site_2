@@ -129,7 +129,7 @@ a.pinterest-btn svg{width:14px;height:14px;flex-shrink:0}
 
 <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
   <div class="lb-inner" id="lbInner">
-    <button class="lb-close" onclick="document.getElementById('lightbox').classList.remove('open')">✕</button>
+    <button class="lb-close" onclick="closeLightbox()">✕</button>
     <img id="lbImg" class="lb-img" src="" alt="">
     <div class="lb-body">
       <div class="lb-cat" id="lbCat"></div>
@@ -238,19 +238,20 @@ function openLightbox(id) {
   document.getElementById('lbDesc').textContent = item.description;
   document.getElementById('lightbox').classList.add('open');
   document.body.style.overflow = 'hidden';
+  document.documentElement.style.overflow = 'hidden';
 }
 
 function closeLightbox(e) {
-  if (e.target === document.getElementById('lightbox')) {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
-  }
+  const lightbox = document.getElementById('lightbox');
+  if (e && e.target !== lightbox) return;
+  lightbox.classList.remove('open');
+  document.body.style.overflow = '';
+  document.documentElement.style.overflow = '';
 }
 
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
-    document.getElementById('lightbox').classList.remove('open');
-    document.body.style.overflow = '';
+    closeLightbox();
   }
 });
 
